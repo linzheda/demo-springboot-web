@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理页面</title>
+    <link rel="shortcut icon" th:href="@{/image/yc.ico}">
+    <link rel="stylesheet" type="text/css" th:href="@{/easyui/themes/default/easyui.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/easyui/themes/icon.css}">
+    <script type="text/javascript" th:src="@{/easyui/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/easyui/jquery.easyui.min.js}"></script>
+</head>
+<script type="text/javascript">
+    $(function () {
+        closemenu();
+        $('#admin_content_info').tabs('add', {
+            title: "源辰信息",
+            href: '/toyc.action',
+            fit: true,
+            closable: false,
+        });
+        $.ajax({
+            type: 'POST',
+            dataType: "json",
+            url: '/back/role/Roles.action',
+            success: function (data) {
+                $.each(data, function (i, n) {//加载父类节点即一级菜单
+                    $('#accordions').accordion('add', {
+                        title: n.fname,
+                        selected: false,
+                        content: '<div style="padding:10px"><ul  name="' + n.fname + '"></ul></div>',
+                    });
+                });
+                $('#accordions').accordion('add', {
+                    selected: true,
+                    content: '<div ></div>',
+                });
+            }
+        });
+        /****以上加载一级目录 ****/
+        $('#accordions').accordion({//加载二级菜单
+            onSelect: function (title, index) {
+                if (title == "" || title == undefined || title == null) {
+                } else {
+                    try {
+                        $('ul[name="' + title + '"]').tree('getRoots');
+                    } catch (e) {
+                        $('ul[name="' + title + '"]').tree({
+                            method: 'GET',
+                            queryParams: {rName: title},
+                            url: '/back/function/Functions.action',
+                            onClick: function (node) {
+                                var id = node.id;//获取点击的节点id
+                                var title = "源辰信息";
+                                var href = "/toyc.action";
+                                var tabObj = $('#admin_content_info');
+                                if (tabObj.tabs('exists', node.text)) {
+                                    tabObj.tabs('select', node.text);
+                                    return;
+                                } else {
+                                    title = node.text;
+                                    href = "/" + node.url;
+                                }
+                                tabObj.tabs('add', {
+                                    title: title,
+                                    content: '<iframe scrolling="no" frameborder="0"  src="' + href + '" style="width:100%;height:99%;"></iframe>',
+                                    fit: true,
+                                    closable: true,
+                                });
+
+                            }
+                        });
+                    }
+
+                }
+            }
+        });
+    });
+</script>
+<body class="easyui-layout">
+<!--标题栏-->
+<div data-options="region:'north',title:'   ',split:true"
+     style="height:100px;background:url('/image/logo.png');background-position:left;background-repeat:no-repeat;background-size:100px 50px;">
+
+   <h1 align="center">后台管理页面</h1>
+    <!--修改密码-->
+    <div id="admin_changePassword_hidden_div" class="easyui-window" data-options="modal:true,closed:true"
+         style="width: 400px;height: 260px;padding-left:35px;">
+        <br><br>
+        <label>请输入原密码:</label>
+        <input  id="admin_chengepassword_oldpassword" class="easyui-passwordbox" prompt="Password" style="width:200px;">
+        <br><br>
+        <label>请输入新密码:</label>
+        <input  id="admin_chengepassword_newpassword1" class="easyui-passwordbox" prompt="Password" style="width:200px;">
+        <br><br>
+        <label>请再次输入密码:</label>
+        <input  id="admin_chengepassword_newpassword2" class="easyui-passwordbox" prompt="Password" style="width:190px;">
+        <br><br>
+        <a  href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit'" onclick="changepassword()">修改</a>
+
+    </div>
+    <!--用户个人中心菜单栏-->
+    <input type="hidden" id="loginIngUserID" value="${session.user.id }"/>
+    <div style="float:right;margin-top:-30px;padding-right:50px;">
+        <div>
+            <b  th:text="'您好,'+${session.user.userName}"></b>
+            <a href="javascript:void(0)" id="mb" class="easyui-menubutton" data-options="menu:'#mm',iconCls:'icon-edit'">个人中心</a>
+            <div id="mm" style="width:150px;">
+                <div data-options="iconCls:'icon-telephone'"><a target="_Blank" th:href="@{/toyc.action}">联系我们</a></div>
+                <div data-options="iconCls:'icon-edit'"><a  href="javascript:void(0)" onclick="clickChangePassword()">修改密码</a></div>
+            </div>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-power'"
+               onclick="loginOut()">退出</a>
+        </div>
+    </div>
+
+</div>
+<!--版权栏-->
+<div data-options="region:'south',title:'&nbsp;版权所有：@源辰信息科技有限公司',split:true" style="height:0px;">
+</div>
+<!--工具栏-->
+<div data-options="region:'east',iconCls:'icon-reload',title:'工具栏',collapsed:true,split:true" style="width:150px;">
+    <div class="easyui-calendar" style="width: 150px; height: 150px;"></div>
+</div>
+<!--菜单栏-->
+<div data-options="region:'west',iconCls:'icon-menu',title:'菜单栏',split:true" style="width:150px;">
+    <div id="accordions" data-options="fit:true,border:false"></div>
+</div>
+<!--内容区-->
+<!--全屏和退出全屏-->
+<div
+        data-options="region:'center',title:'操作',tools:[{
+		iconCls:'icon-full',
+		handler:function(){
+			full();
+		}
+	},{
+		iconCls:'icon-unfull',
+		handler:function(){
+			unFull();
+		}
+	}]">
+    <div id="admin_content_info" class="easyui-tabs"
+         data-options="fit:true"></div>
+
+</div>
+<!--右键关闭-->
+<div id="rcmenu" class="easyui-menu" style="">
+    <div id="closeall">关闭全部</div>
+    <div id="closeother">关闭其他</div>
+    <div id="closeright">当前页右侧全部关闭</div>
+    <div id="closeleft">当前页左侧全部关闭</div>
+</div>
+</body>
+<script type="text/javascript">
+    //退出
+    function loginOut() {
+        $.get("front/loginOut.do", {}, function (data) {
+            if (data) {
+                location.href = 'index.jsp';
+            }
+        }, "json");
+    }
+
+    function closemenu() {
+        //绑定右键菜单事件
+        $(".easyui-tabs").bind('contextmenu', function (e) {
+            e.preventDefault();
+            $('#rcmenu').menu('show', {
+                left: e.pageX,
+                top: e.pageY
+            });
+        });
+        //关闭所有标签页
+        $("#closeall").bind("click", function () {
+            var tablist = $('#admin_content_info').tabs('tabs');
+            console.log(tablist);
+            //  return;
+            for (var i = tablist.length - 1; i >= 1; i--) {
+                $('#admin_content_info').tabs('close', i);
+            }
+        });
+        //关闭其他页面（先关闭右侧，再关闭左侧）
+        $("#closeother").bind("click", function () {
+            var tablist = $('#admin_content_info').tabs('tabs');
+            var tab = $('#admin_content_info').tabs('getSelected');
+            var index = $('#admin_content_info').tabs('getTabIndex', tab);
+            for (var i = tablist.length - 1; i > index; i--) {
+                $('#admin_content_info').tabs('close', i);
+            }
+            var num = index - 1;
+            if (num < 1) {
+                return;
+            } else {
+                for (var i = num; i >= 1; i--) {
+                    $('#admin_content_info').tabs('close', i);
+                }
+                $("#admin_content_info").tabs("select", 1);
+            }
+        });
+        //关闭右边的选项卡
+        $("#closeright").bind("click", function () {
+            var tablist = $('#admin_content_info').tabs('tabs');
+            var tab = $('#admin_content_info').tabs('getSelected');
+            var index = $('#admin_content_info').tabs('getTabIndex', tab);
+            for (var i = tablist.length - 1; i > index; i--) {
+                $('#admin_content_info').tabs('close', i);
+            }
+        });
+        //关闭左边的选项卡
+        $("#closeleft").bind("click", function () {
+            var tablist = $('#admin_content_info').tabs('tabs');
+            var tab = $('#admin_content_info').tabs('getSelected');
+            var index = $('#admin_content_info').tabs('getTabIndex', tab);
+            var num = index - 1;
+            if (num < 1) {
+                return;
+            } else {
+                for (var i = num; i >= 1; i--) {
+                    $('#admin_content_info').tabs('close', i);
+                }
+                $("#admin_content_info").tabs("select", 1);
+            }
+        });
+
+    }
+</script>
+<script type="text/javascript">
+    function clickChangePassword() {
+        $("#admin_changePassword_hidden_div").window("setTitle", "修改密码");
+        $("#admin_changePassword_hidden_div").window("open");
+    }
+
+    function changepassword() {
+        var oldpassword = $("#admin_chengepassword_oldpassword").val();
+        var newpassword1 = $("#admin_chengepassword_newpassword1").val();
+        var newpassword2 = $("#admin_chengepassword_newpassword2").val();
+        if (newpassword1 == newpassword2) {
+            $.ajax({
+                url: "front/changepassword.action",
+                data: "oldpassword=" + oldpassword + "&newpassword=" + newpassword1,
+                type: "POST",
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.code == 1) {
+                        alert("修改密码成功,请重新登入");
+                        loginOut();
+                    } else if (data.code == 0) {
+                        alert(data.error);
+                    }
+                }
+            });
+        } else {
+            alert("两次输入的密码不一致");
+        }
+    }
+</script>
+
+</html>

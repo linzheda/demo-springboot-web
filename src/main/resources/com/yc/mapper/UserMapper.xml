@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yc.mapper.UserMapper">
+	<select id="login" parameterType="User" resultType="User">
+		select * from systemuser where userName=#{userName} and password=#{password}
+	</select>
+	<resultMap type="TempPage"  id="TempPageMap" >
+			<id column="total" property="total"/>
+			<collection property="rows" column="id"  ofType="UserAndRole">
+					<id column="id" property="id"/>
+					<result column="userName" property="userName"/>
+					<result column="registertime" property="registertime"/>
+					<result column="updatetime" property="updatetime"/>
+					<result column="rname" property="rname"/>
+			</collection>
+	</resultMap>
+	
+	<select id="findPage" parameterType="map" resultMap="TempPageMap">
+		select (select count(1) from systemuser) total, s.id,userName,s.registerTime,s.updateTime,r.rname from systemuser s 
+		left join auth_user_role ur 
+		on ur.user_id= s.id 
+		left join auth_role r 
+		on ur.role_id=r.rid 
+		<if test="page!=null  and size!=null">
+			limit #{page},#{size}
+		</if>
+	</select>
+	
+	
+	<insert id="save" parameterType="User" >
+	    insert into systemuser(userName,password,registerTime,updateTime) values(#{userName},#{password},now(),null)
+   </insert>
+	
+	<select id="findById" parameterType="User" resultType="User">
+		select * from systemuser where id=#{id}
+	</select>
+	
+	<update id="update" parameterType="User">
+		update systemuser
+		<set>
+			<if test="userName!=null">
+				userName=#{userName},
+			</if>
+			<if test="password!=null">
+				password=#{password},
+			</if>
+			
+			updateTime=now()
+					
+		</set>
+		<if test="id!=null">
+			where id=#{id}
+		</if>
+	</update>
+	
+	<delete id="deleteById" parameterType="User"><!-- uid=1是用户这个角色不能删除 -->
+  		delete from systemuser where id=#{id} and id!=1
+  	</delete>
+  	<!--查询权限按钮id编号   -->
+  	<select id="findButtonId" parameterType="map" resultType="String" >
+  		select buttonId from auth_function f,auth_user_role ur,auth_role_function rf 
+  		where f.fid=rf.function_id and ur.role_id=rf.role_id 
+  		and  ur.user_id=#{uid} and f.buttonId is not null
+  	</select>
+  	
+</mapper>

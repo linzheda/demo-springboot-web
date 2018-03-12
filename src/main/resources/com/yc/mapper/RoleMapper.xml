@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yc.mapper.RoleMapper">
+	<select id="findTwoFunctionById" parameterType="map" resultType="Function">
+		select b.* from (select * from auth_function where fid in (select function_id from auth_role_function where role_id in (select role_id from auth_user_role where user_id=#{uid}))  ) b where b.accordion=
+		(select min(a.accordion) from (select * from auth_function where fid in (select function_id from auth_role_function where role_id in (select role_id from auth_user_role where user_id=#{uid}))) a) and status='是'
+	</select>
+	
+	<insert id="saveRole" parameterType="Role"  useGeneratedKeys="true" keyProperty="rid">
+	    insert into auth_role(rid, rname,addTime,updateTime) values(null,#{rname},now(),null)
+    </insert>
+    
+    <delete id="deleteRoleById" parameterType="Role"><!-- rid==1是管理员这个角色不能删除 -->
+  		delete from auth_role where rid=#{rid} and rid!=1
+  	</delete>
+  	
+  	<update id="updateRole" parameterType="Role">
+		update auth_role
+		<set>
+			<if test="rname!=null">
+				rname=#{rname},
+			</if>
+				updateTime=now()
+		</set>
+		<if test="rid!=null">
+			where rid=#{rid}
+		</if>
+	</update>
+	<resultMap type="TempPage" id="rolesBypagesMap">
+		<id column="total"  property="total"/>
+		<collection property="rows" column="rid" ofType="Role">
+				<id property="rid" column="rid"/>
+				<result property="rname" column="rname"/>
+				<result property="addtime" column="addtime"/>
+				<result property="updatetime" column="updatetime"/>
+		</collection>
+	</resultMap>
+	<resultMap type="TempPage" id="rolesBypagesMaps">
+		<id column="total"  property="total"/>
+		<collection property="rows" column="rid" ofType="RoleAndFunction">
+				<id property="rid" column="rid"/>
+				<result property="rname" column="rname"/>
+				<result property="addtime" column="addtime"/>
+				<result property="updatetime" column="updatetime"/>
+				<result property="fname" column="fname"/>
+		</collection>
+	</resultMap>
+	<select id="findRolesByPages"  parameterType="map" resultMap="rolesBypagesMaps">
+		select (select count(1) from auth_role) total,a.*,(select group_concat(fname) from auth_function f inner join auth_role_function rf on rf.function_id=f.fid where rf.role_id=a.rid and f.accordion=3 ) fname
+		from auth_role a 
+		limit #{page},#{size} 
+	</select>
+	
+	<select id="selRoles" parameterType="map" resultType="Role">
+			select * from auth_role where rid in( select role_id from  auth_user_role where user_id =#{uid})
+	</select>
+</mapper>
