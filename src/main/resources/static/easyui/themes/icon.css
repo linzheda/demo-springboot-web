@@ -64,9 +64,6 @@
 .icon-lock{
 	background:url('icons/lock.png') no-repeat center center;
 }
-.icon-more{
-	background:url('icons/more.png') no-repeat center center;
-}
 
 
 .icon-mini-add{
@@ -105,8 +102,14 @@
 	background: url('myicons/power.ico') no-repeat center center;
 }
 .icon-telephone{
-	 background: url('myicons/telephone.png') no-repeat center center;
- }
-.icon-menu{
-	background: url('myicons/menu.png') no-repeat center center;
+	background: url('myicons/telephone.png') no-repeat center center;
+}
+.icon-menu {
+	background: url('myicons/meun.ico') no-repeat center center;
+}
+.icon-submenu{
+	background: url('myicons/submenu.ico') no-repeat center center;
+}
+.icon-tabs{
+	background: url('myicons/tabs.ico') no-repeat center center;
 }

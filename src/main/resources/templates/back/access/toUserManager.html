@@ -1,46 +1,18 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
+<head th:insert="/common/top_header :: head">
     <title>用户管理</title>
-    <link rel="shortcut icon" th:href="@{/image/yc.ico}">
-    <link rel="stylesheet" type="text/css" th:href="@{/easyui/themes/default/easyui.css}">
-    <link rel="stylesheet" type="text/css" th:href="@{/easyui/themes/icon.css}">
-    <script type="text/javascript" th:src="@{/easyui/jquery.min.js}"></script>
-    <script type="text/javascript" th:src="@{/easyui/jquery.easyui.min.js}"></script>
+
 </head>
 <body>
 <!-- ----------begin------------- -->
-<table id="userData" data-options="fit:true" title="用户管理"
-       toolbar="#userGrid_bar" pagination="true" idField="id"
-       rownumbers="true" fitColumns="true" singleSelect="true" loadMsg="加载中...">
-    <thead>
-    <tr>
-        <th data-options="field:'ck',checkbox:true"></th>
-        <th field="userName" width="50" editor="{type:'validatebox',option:{required:true}}">用户名</th>
-        <th field="rname"  width="50" editor="{type:'validatebox',option:{required:true}}">角色</th>
-        <th field="registertime"     width="50" editor="text">注册时间</th>
-        <th field="updatetime"     width="50" editor="text">修改时间</th>
-    </tr>
-    </thead>
-</table>
-<div id="userGrid_bar">
-    <a	id="button_user_add" href="javascript:void(0)"
-          class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true"
-          onclick="append()">添加</a>
-    <a id="button_user_delte" href="javascript:void(0)"
-       onclick="delUsers()" class="easyui-linkbutton"
-       data-options="iconCls:'icon-remove',plain:true">删除</a>
-    <a id="button_user_update"
-       href="javascript:void(0)" class="easyui-linkbutton"
-       data-options="iconCls:'icon-edit',plain:true" onclick="updateUser()">修改</a>
-</div>
-<!-- 以上是自定义菜单区域 -->
+<table id="userData" data-options="fit:true" title="用户管理"></table>
+
+<!--添加用户表单区 -->
 <div id="userGridwin">
     <div style="padding: 10px 60px 20px 60px">
         <form id="userform" class="easyui-form" method="post"
               data-options="novalidate:true" action="">
-
             <table cellpadding="5">
                 <tr>
                     <td>用户名:</td>
@@ -58,7 +30,7 @@
                                name="rpwd" data-options="required:true"></input></td>
                 </tr>
             </table>
-            <input type="hidden" id="id" name="id" />
+            <input type="hidden" id="id" name="id"/>
         </form>
         <div style="text-align: center; padding: 5px">
             <a id="userDataButton" href="javascript:void(0)"
@@ -67,14 +39,74 @@
     </div>
 </div>
 <!-- 以上是添加用户的表单区域 -->
-
-<script type="text/javascript">
+<script th:inline="javascript">
     var editIndex = undefined;
     var editStatus = undefined;//用户进行的操作状态，用来区分添加还是修改
     var userObj;
-    userObj=$('#userData').datagrid({
-        url:'/back/user/findUser.action'
+    userObj = $('#userData').datagrid({
+        url: '/back/user/findUser.action',
+        striped : true,
+        loadMsg : "正在加载中...",
+        pagination : true,
+        pageNumber : 1,
+        pageSize : 50,
+        pageList : [ 10, 20, 30, 40, 50 ],
+        remoteSort : false,
+        toolbar : [ {
+            id:'button_user_add',
+            text : '添加',
+            iconCls : 'icon-add',
+            handler : function() {
+                append();
+            }
+        }, {
+            id:'button_user_update',
+            text : '修改',
+            iconCls : 'icon-edit',
+            handler : function() {
+                updateUser();
+            }
+        }, {
+            id:'button_user_delete',
+            text : '删除',
+            iconCls : 'icon-remove',
+            handler : function() {
+                delUsers();
+            }
+        }],
+        columns : [ [ {
+            field : 'id',
+            sortable : true,
+            align : 'center',
+            checkbox : true
+        }, {
+            field : 'userName',
+            title : '用户名',
+            width : 200,
+            align : 'center'
+        }, {
+            field : 'rname',
+            title : '角色',
+            width : 180,
+            align : 'center'
+        }, {
+            field : 'registertime',
+            title : '注册时间',
+            width : 180,
+            align : 'center'
+        }, {
+            field : 'updatetime',
+            title : '上次修改时间',
+            width : 180,
+            align : 'center'
+        } ] ]
     });
+
+
+    authButShow("button_user_add");
+    authButShow("button_user_delete");
+    authButShow("button_user_update");
+
     /* 删除用户，一次只删除一个，由于后台的原因 */
     function delUsers() {
         var rows = userObj.datagrid("getSelections");
@@ -83,7 +115,7 @@
             if (rows[0].id == loginIngUserID) {
                 $.messager.alert('失败提示', '权限不足...', 'error');
             } else {
-                $.messager.confirm('信息确认', '您确定要删除选定的数据吗?', function(r) {
+                $.messager.confirm('信息确认', '您确定要删除选定的数据吗?', function (r) {
                     if (r) {
                         var nids = "";
                         for (var i = 0; i < rows.length - 1; i++) {
@@ -91,14 +123,14 @@
                         }
                         nids += rows[rows.length - 1].id;
                         $.post("/back/user/removeUser.action", {
-                            id : nids
-                        }, function(data) {
+                            id: nids
+                        }, function (data) {
                             if (data) {
                                 $.messager.show({
-                                    title : '成功提示',
-                                    msg : '删除成功',
-                                    timeout : 2000,
-                                    showType : 'slide'
+                                    title: '成功提示',
+                                    msg: '删除成功',
+                                    timeout: 2000,
+                                    showType: 'slide'
                                 });
                                 rows = undefined;
                                 $('#userData').datagrid('reload');//刷新表格
@@ -113,6 +145,7 @@
             $.messager.alert('温馨提示', '请选择要删除的数据...', 'info');
         }
     }
+
     /* 更新用户信息 */
     function updateUser() {
         editStatus = "update";
@@ -122,21 +155,21 @@
         if (rows.length > 0) {
             $("#id").val(rows[0].id);
             $('#userGridwin').dialog({
-                title : '修改',
-                closed : false
+                title: '修改',
+                closed: false
             });
             $('#userName').textbox({
-                value : rows[0].userName
+                value: rows[0].userName
             });
             $('#password').textbox({
-                value : ""
+                value: ""
             });
             $('#rpwd').textbox({
-                value : ""
+                value: ""
             });
             $('#userDataButton').linkbutton({
-                plain : true,
-                iconCls : 'icon-ok'
+                plain: true,
+                iconCls: 'icon-ok'
             });
 
         } else {
@@ -149,23 +182,24 @@
         editStatus = "add";
         $("#id").val('');
         $('#userGridwin').dialog({
-            title : '添加',
-            closed : false
+            title: '添加',
+            closed: false
         });
         $('#userName').textbox({
-            value : ""
+            value: ""
         });
         $('#password').textbox({
-            value : ""
+            value: ""
         });
         $('#rpwd').textbox({
-            value : ""
+            value: ""
         });
         $('#userDataButton').linkbutton({
-            plain : true,
-            iconCls : 'icon-ok'
+            plain: true,
+            iconCls: 'icon-ok'
         });
     }
+
     /* 提交添加或更新用户信息表单事件 */
     function submitUserForm() {
         var loginIngUserID = $("#loginIngUserID").val();
@@ -175,8 +209,8 @@
                 return;
             }
             $('#userform').form('submit', {
-                url : '/back/user/updateUser.action',
-                onSubmit : function() {
+                url: '/back/user/updateUser.action',
+                onSubmit: function () {
                     if ($("#userName").val().length < 2) {
                         $.messager.alert('错误', '用户名长度不能太短...', 'error');
                         return false;
@@ -189,14 +223,14 @@
                     }
                     return true;
                 },
-                success : function(data) {
+                success: function (data) {
                     if (data > 0) {
                         $('#userGridwin').dialog('close');
                         $.messager.show({
-                            title : '成功提示',
-                            msg : '用户信息更新	成功',
-                            timeout : 5000,
-                            showType : 'slide'
+                            title: '成功提示',
+                            msg: '用户信息更新	成功',
+                            timeout: 5000,
+                            showType: 'slide'
                         });
                         editStatus = undefined;
                         $('#userData').datagrid("reload");
@@ -207,8 +241,8 @@
             });
         } else if (editStatus == "add") {
             $('#userform').form('submit', {
-                url : '/back/user/addUser.action',
-                onSubmit : function() {
+                url: '/back/user/addUser.action',
+                onSubmit: function () {
                     if ($("#userName").val().length < 2) {
                         $.messager.alert('错误', '用户名长度不能太短...', 'error');
                         return false;
@@ -221,14 +255,14 @@
                     }
                     return true;
                 },
-                success : function(data) {
+                success: function (data) {
                     if (data > 0) {
                         $('#userGridwin').dialog('close');
                         $.messager.show({
-                            title : '成功提示',
-                            msg : '添加成功',
-                            timeout : 5000,
-                            showType : 'slide'
+                            title: '成功提示',
+                            msg: '添加成功',
+                            timeout: 5000,
+                            showType: 'slide'
                         });
                         editStatus = undefined;
                         $('#userData').datagrid("reload");
@@ -239,14 +273,11 @@
             });
         }
     }
+
     /* 	重置添加用户表单 */
     function clearUserForm() {
         $('#userform').form('clear');
     }
 </script>
-
-
-
-
 </body>
 </html>

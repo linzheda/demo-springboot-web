@@ -4,6 +4,7 @@ import com.yc.entity.TempPage;
 import com.yc.entity.User;
 import com.yc.service.UserService;
 import com.yc.util.Encrypt;
+import com.yc.util.JsonMode;
 import com.yc.util.SessionAttributeKey;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -43,19 +44,18 @@ public class UserController {
 
         if(user.getUserName()==null&&user.getPassword()==null){
             model.addAttribute("errorMsg", "用户名或密码不能为空...");
-            return "back/error";
+            return "errorpage/error";
         }
         String md5Password= Encrypt.md5AndSha(user.getPassword());
         try {
             user = userservice.getUser(user.getUserName(), md5Password);
         } catch (Exception e) {
             model.addAttribute("errorMsg", "用户名或密码错误...");
-            return "back/error";
+            return "errorpage/error";
         }
         if (user!=null) {
             model.addAttribute(SessionAttributeKey.LOGIN_ADMIN, user);
             session.setAttribute(SessionAttributeKey.LOGIN_ADMIN, user);
-            //TODO:这里把用户有哪些按钮查出来存到session
             //这里查出所有的按钮列表
             List<String> list=userservice.findButtonId(user);
             String[] array=new String[list.size()];
@@ -66,7 +66,7 @@ public class UserController {
             return "back/mainManager";
         } else {
             model.addAttribute("errorMsg", "用户名或密码错误...");
-            return "back/error";
+            return "errorpage/error";
         }
     }
 
@@ -131,6 +131,14 @@ public class UserController {
         return user;
     }
 
-
+    //修改密码
+    @ResponseBody
+    @RequestMapping(value= "/changepassword.action",method=RequestMethod.POST)
+    public JsonMode changepassword(String oldpassword,String newpassword,HttpSession session) {
+        User user=(User) session.getAttribute(SessionAttributeKey.LOGIN_ADMIN);
+        JsonMode jm=new JsonMode();
+        jm=userservice.changepassword(user,Encrypt.md5AndSha(oldpassword),Encrypt.md5AndSha(newpassword));
+        return jm;
+    }
 
 }

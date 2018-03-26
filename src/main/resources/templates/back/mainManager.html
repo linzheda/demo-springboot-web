@@ -1,13 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
+<head th:insert="/common/top_header :: head">
     <title>后台管理页面</title>
-    <link rel="shortcut icon" th:href="@{/image/yc.ico}">
-    <link rel="stylesheet" type="text/css" th:href="@{/easyui/themes/default/easyui.css}">
-    <link rel="stylesheet" type="text/css" th:href="@{/easyui/themes/icon.css}">
-    <script type="text/javascript" th:src="@{/easyui/jquery.min.js}"></script>
-    <script type="text/javascript" th:src="@{/easyui/jquery.easyui.min.js}"></script>
 </head>
 <script type="text/javascript">
     $(function () {
@@ -28,11 +22,13 @@
                         title: n.fname,
                         selected: false,
                         content: '<div style="padding:10px"><ul  name="' + n.fname + '"></ul></div>',
+                        iconCls:'icon-submenu'
                     });
                 });
                 $('#accordions').accordion('add', {
                     selected: true,
-                    content: '<div ></div>',
+                    content: '<div></div>',
+                    iconCls:'icon-submenu'
                 });
             }
         });
@@ -48,6 +44,7 @@
                             method: 'GET',
                             queryParams: {rName: title},
                             url: '/back/function/Functions.action',
+                            iconCls:"icon-save",
                             onClick: function (node) {
                                 var id = node.id;//获取点击的节点id
                                 var title = "源辰信息";
@@ -65,7 +62,9 @@
                                     content: '<iframe scrolling="no" frameborder="0"  src="' + href + '" style="width:100%;height:99%;"></iframe>',
                                     fit: true,
                                     closable: true,
-                                });
+                                    iconCls:'icon-tabs'
+
+                            });
 
                             }
                         });
@@ -81,35 +80,37 @@
 <div data-options="region:'north',title:'   ',split:true"
      style="height:100px;background:url('/image/logo.png');background-position:left;background-repeat:no-repeat;background-size:100px 50px;">
 
-   <h1 align="center">后台管理页面</h1>
+    <h1 align="center">后台管理页面</h1>
     <!--修改密码-->
     <div id="admin_changePassword_hidden_div" class="easyui-window" data-options="modal:true,closed:true"
          style="width: 400px;height: 260px;padding-left:35px;">
         <br><br>
         <label>请输入原密码:</label>
-        <input  id="admin_chengepassword_oldpassword" class="easyui-passwordbox" prompt="Password" style="width:200px;">
+        <input id="admin_chengepassword_oldpassword" class="easyui-passwordbox" prompt="Password" style="width:200px;">
         <br><br>
         <label>请输入新密码:</label>
-        <input  id="admin_chengepassword_newpassword1" class="easyui-passwordbox" prompt="Password" style="width:200px;">
+        <input id="admin_chengepassword_newpassword1" class="easyui-passwordbox" prompt="Password" style="width:200px;">
         <br><br>
         <label>请再次输入密码:</label>
-        <input  id="admin_chengepassword_newpassword2" class="easyui-passwordbox" prompt="Password" style="width:190px;">
+        <input id="admin_chengepassword_newpassword2" class="easyui-passwordbox" prompt="Password" style="width:190px;">
         <br><br>
-        <a  href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit'" onclick="changepassword()">修改</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit'"
+           onclick="changepassword()">修改</a>
 
     </div>
     <!--用户个人中心菜单栏-->
     <input type="hidden" id="loginIngUserID" value="${session.user.id }"/>
     <div style="float:right;margin-top:-30px;padding-right:50px;">
         <div>
-            <b  th:text="'您好,'+${session.user.userName}"></b>
-            <a href="javascript:void(0)" id="mb" class="easyui-menubutton" data-options="menu:'#mm',iconCls:'icon-edit'">个人中心</a>
+            <b th:text="'您好,'+${session.user.userName}"></b>
+            <a href="javascript:void(0)" id="mb" class="easyui-menubutton"
+               data-options="menu:'#mm',iconCls:'icon-edit'">个人中心</a>
             <div id="mm" style="width:150px;">
                 <div data-options="iconCls:'icon-telephone'"><a target="_Blank" th:href="@{/toyc.action}">联系我们</a></div>
-                <div data-options="iconCls:'icon-edit'"><a  href="javascript:void(0)" onclick="clickChangePassword()">修改密码</a></div>
+                <div data-options="iconCls:'icon-edit'"><a href="javascript:void(0)" onclick="clickChangePassword()">修改密码</a>
+                </div>
             </div>
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-power'"
-               onclick="loginOut()">退出</a>
+            <a th:href="@{/login.action}" class="easyui-linkbutton" data-options="iconCls:'icon-power'">退出</a>
         </div>
     </div>
 
@@ -152,15 +153,6 @@
 </div>
 </body>
 <script type="text/javascript">
-    //退出
-    function loginOut() {
-        $.get("front/loginOut.do", {}, function (data) {
-            if (data) {
-                location.href = 'index.jsp';
-            }
-        }, "json");
-    }
-
     function closemenu() {
         //绑定右键菜单事件
         $(".easyui-tabs").bind('contextmenu', function (e) {
@@ -236,7 +228,7 @@
         var newpassword2 = $("#admin_chengepassword_newpassword2").val();
         if (newpassword1 == newpassword2) {
             $.ajax({
-                url: "front/changepassword.action",
+                url: "/back/user/changepassword.action",
                 data: "oldpassword=" + oldpassword + "&newpassword=" + newpassword1,
                 type: "POST",
                 dataType: "JSON",

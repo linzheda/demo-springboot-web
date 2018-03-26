@@ -1,14 +1,14 @@
 /**
- * EasyUI for jQuery 1.5.4.2
+ * jQuery EasyUI 1.4.1
  * 
- * Copyright (c) 2009-2018 www.jeasyui.com. All rights reserved.
+ * Copyright (c) 2009-2014 www.jeasyui.com. All rights reserved.
  *
- * Licensed under the freeware license: http://www.jeasyui.com/license_freeware.php
- * To use it on other terms please contact us: info@jeasyui.com
+ * Licensed under the GPL license: http://www.gnu.org/licenses/gpl.txt
+ * To use it on other terms please contact us at info@jeasyui.com
  *
  */
 /**
- * easyloader - EasyUI for jQuery
+ * easyloader - jQuery EasyUI
  * 
  */
 (function(){
@@ -54,11 +54,6 @@
 			css:'propertygrid.css',
 			dependencies:['datagrid']
 		},
-		datalist:{
-			js:'jquery.datalist.js',
-			css:'datalist.css',
-			dependencies:['datagrid']
-		},
 		panel: {
 			js:'jquery.panel.js',
 			css:'panel.css'
@@ -76,7 +71,7 @@
 		messager:{
 			js:'jquery.messager.js',
 			css:'messager.css',
-			dependencies:['linkbutton','dialog','progressbar']
+			dependencies:['linkbutton','window','progressbar']
 		},
 		layout:{
 			js:'jquery.layout.js',
@@ -105,10 +100,6 @@
 			css:'splitbutton.css',
 			dependencies:['menubutton']
 		},
-		switchbutton:{
-			js:'jquery.switchbutton.js',
-			css:'switchbutton.css'
-		},
 		accordion:{
 			js:'jquery.accordion.js',
 			css:'accordion.css',
@@ -122,11 +113,6 @@
 			js:'jquery.textbox.js',
 			css:'textbox.css',
 			dependencies:['validatebox','linkbutton']
-		},
-		passwordbox:{
-			js:'jquery.passwordbox.js',
-			css:'passwordbox.css',
-			dependencies:['textbox']
 		},
 		filebox:{
 			js:'jquery.filebox.js',
@@ -150,14 +136,6 @@
 		combogrid:{
 			js:'jquery.combogrid.js',
 			dependencies:['combo','datagrid']
-		},
-		combotreegrid:{
-			js:'jquery.combotreegrid.js',
-			dependencies:['combo','treegrid']
-		},
-		tagbox:{
-			js:'jquery.tagbox.js',
-			dependencies:['combobox']
 		},
 		validatebox:{
 			js:'jquery.validatebox.js',
@@ -204,11 +182,11 @@
 			js:'jquery.slider.js',
 			dependencies:['draggable']
 		},
+		tooltip:{
+			js:'jquery.tooltip.js'
+		},
 		parser:{
 			js:'jquery.parser.js'
-		},
-		mobile:{
-			js:'jquery.mobile.js'
 		}
 	};
 	

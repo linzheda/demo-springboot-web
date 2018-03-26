@@ -55,14 +55,12 @@
 	    	}
 		}
 		function onContextMenu(e,row){
-			if (row){
-				e.preventDefault();
-				$(this).treegrid('select', row.id);
-				$('#mm').menu('show',{
-					left: e.pageX,
-					top: e.pageY
-				});				
-			}
+			e.preventDefault();
+			$(this).treegrid('select', row.id);
+			$('#mm').menu('show',{
+				left: e.pageX,
+				top: e.pageY
+			});
 		}
 		var idIndex = 100;
 		function append(){

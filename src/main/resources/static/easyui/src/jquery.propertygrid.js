@@ -1,14 +1,14 @@
 /**
- * EasyUI for jQuery 1.5.4.2
+ * jQuery EasyUI 1.4.1
  * 
- * Copyright (c) 2009-2018 www.jeasyui.com. All rights reserved.
+ * Copyright (c) 2009-2014 www.jeasyui.com. All rights reserved.
  *
- * Licensed under the freeware license: http://www.jeasyui.com/license_freeware.php
- * To use it on other terms please contact us: info@jeasyui.com
+ * Licensed under the GPL license: http://www.gnu.org/licenses/gpl.txt
+ * To use it on other terms please contact us at info@jeasyui.com
  *
  */
 /**
- * propertygrid - EasyUI for jQuery
+ * propertygrid - jQuery EasyUI
  * 
  * Dependencies:
  * 	 datagrid
@@ -76,7 +76,6 @@
 				t.datagrid('cancelEdit', index);
 			}
 		});
-		opts.editIndex = undefined;
 	}
 	
 	$.fn.propertygrid = function(options, param){
@@ -134,17 +133,21 @@
 			
 			var table = [];
 			table.push('<div class="datagrid-group" group-index=' + groupIndex + '>');
+			table.push('<table cellspacing="0" cellpadding="0" border="0" style="height:100%"><tbody>');
+			table.push('<tr>');
 			if ((frozen && (opts.rownumbers || opts.frozenColumns.length)) ||
 					(!frozen && !(opts.rownumbers || opts.frozenColumns.length))){
-				table.push('<span class="datagrid-group-expander">');
-				table.push('<span class="datagrid-row-expander datagrid-row-collapse">&nbsp;</span>');
-				table.push('</span>');
+				table.push('<td style="border:0;text-align:center;width:25px"><span class="datagrid-row-expander datagrid-row-collapse" style="display:inline-block;width:16px;height:16px;cursor:pointer">&nbsp;</span></td>');
 			}
+			table.push('<td style="border:0;">');
 			if (!frozen){
 				table.push('<span class="datagrid-group-title">');
 				table.push(opts.groupFormatter.call(target, group.value, group.rows));
 				table.push('</span>');
 			}
+			table.push('</td>');
+			table.push('</tr>');
+			table.push('</tbody></table>');
 			table.push('</div>');
 			
 			table.push('<table class="datagrid-btable" cellspacing="0" cellpadding="0" border="0"><tbody>');
@@ -245,10 +248,7 @@
 				if (!$('#datagrid-group-style').length){
 					$('head').append(
 						'<style id="datagrid-group-style">' +
-						'.datagrid-group{height:'+opts.groupHeight+'px;overflow:hidden;font-weight:bold;border-bottom:1px solid #ccc;}' +
-						'.datagrid-group-title,.datagrid-group-expander{display:inline-block;vertical-align:bottom;height:100%;line-height:'+opts.groupHeight+'px;padding:0 4px;}' +
-						'.datagrid-group-expander{width:'+opts.expanderWidth+'px;text-align:center;padding:0}' +
-						'.datagrid-row-expander{margin:'+Math.floor((opts.groupHeight-16)/2)+'px 0;display:inline-block;width:16px;height:16px;cursor:pointer}' +
+						'.datagrid-group{height:25px;overflow:hidden;font-weight:bold;border-bottom:1px solid #ccc;}' +
 						'</style>'
 					);
 				}
@@ -257,9 +257,6 @@
 	});
 
 	$.extend($.fn.datagrid.methods, {
-		groups:function(jq){
-			return jq.datagrid('options').view.groups;
-		},
 	    expandGroup:function(jq, groupIndex){
 	        return jq.each(function(){
 	            var view = $.data(this, 'datagrid').dc.view;
@@ -302,20 +299,6 @@
 			var dc = state.dc;
 			var group = null;
 			var groupIndex;
-			
-			if (!state.data.rows.length){
-				var originalRows = state.originalRows;
-				var updatedRows = state.updatedRows;
-				var insertedRows = state.insertedRows;
-				var deletedRows = state.deletedRows;
-				$(target).datagrid('loadData', [row]);
-				state.originalRows = $.extend([],originalRows);
-				state.updatedRows = $.extend([],updatedRows);
-				state.insertedRows = $.extend([],insertedRows);
-				state.deletedRows = $.extend([],deletedRows);
-				state.insertedRows.push(row);
-				return;
-			}
 			
 			for(var i=0; i<this.groups.length; i++){
 				if (this.groups[i].value == row[opts.groupField]){
@@ -403,12 +386,9 @@
 		}
 	});
 
-
 	// end of group view definition
 	
 	$.fn.propertygrid.defaults = $.extend({}, $.fn.datagrid.defaults, {
-		groupHeight:21,
-		expanderWidth:16,
 		singleSelect:true,
 		remoteSort:false,
 		fitColumns:true,

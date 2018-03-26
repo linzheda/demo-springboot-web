@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" th:href="@{/image/yc.ico}">
+    <link rel="stylesheet" type="text/css" th:href="@{/easyui/themes/default/easyui.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/easyui/themes/icon.css}">
+    <script type="text/javascript" th:src="@{/easyui/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/easyui/jquery.easyui.min.js}"></script>
+    <script type="text/javascript" th:inline="javascript">
+        var authidArray = new Array();
+        authidArray = [[${session.button}]];
+        //加载按钮权限的方法
+        function authButShow(authButId) {
+            for (var i = 0; i < authidArray.length; i++) {
+                var authid = authidArray[i];
+                if (authButId == authid) {
+                    $('#' + authButId).linkbutton('enable');
+                    return true;
+                }
+            }
+            $('#' + authButId).linkbutton('disable');
+            return false;
+        }
+    </script>
+</head>
+<body>
+
+</body>
+</html>

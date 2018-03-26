@@ -1,52 +1,18 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
+<head th:insert="/common/top_header :: head">
     <title>资源管理</title>
-    <link rel="shortcut icon" th:href="@{/image/yc.ico}">
-    <link rel="stylesheet" type="text/css" th:href="@{/easyui/themes/default/easyui.css}">
-    <link rel="stylesheet" type="text/css" th:href="@{/easyui/themes/icon.css}">
-    <script type="text/javascript" th:src="@{/easyui/jquery.min.js}"></script>
-    <script type="text/javascript" th:src="@{/easyui/jquery.easyui.min.js}"></script>
 </head>
 <body>
 <div class="easyui-layout" data-options="fit:true">
     <div data-options="region:'west',split:true,border:false" style="width:200px">
-        <ul id="selAllfunctionTree">
-
-        </ul>
+        <ul id="selAllfunctionTree"></ul>
     </div>
     <div data-options="region:'center',border:false">
-        <table id="functionGrid" data-options="fit:true,collapsible:true" toolbar="#functionGrid_bar" title="资源管理"
-               pagination="true" idField="fid"
-               rownumbers="true" fitColumns="true" singleSelect="true" loadMsg="加载中..."
-        >
-            <thead>
-            <tr>
-                <th field="fid" width="50" hidden="true">资源id</th>
-                <th field="fname" width="50" editor="{type:'validatebox',option:{required:true}}">资源名</th>
-                <th field="url" width="50" editor="text">url</th>
-                <th field="status" width="50" editor="text">状态</th>
-            </tr>
-
-            </thead>
-
-
-        </table>
+        <table id="functionGrid" data-options="fit:true,collapsible:true" title="资源管理"></table>
     </div>
 </div>
-<div id="functionGrid_bar" style="padding:5px;height:auto">
-    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true"
-       onclick="acceptFunction()">保存修改</a>
-</div>
-<script type="text/javascript">
-    //第一次加载一次表格显示数据用
-    $('#functionGrid').datagrid({
-        singleSelect: true,
-        queryParams: {parent_id: -1},
-        url: '/back/function/findFunctionByPages.action',
-        onClickCell: onClickCell
-    });
+<script th:inline="javascript">
     //树加载
     $('#selAllfunctionTree').tree({
         lines: true,
@@ -58,13 +24,52 @@
                     singleSelect: true,
                     queryParams: {parent_id: node.id},
                     url: '/back/function/findFunctionByPages.action',
+                    striped : true,
+                    loadMsg : "正在加载中...",
+                    pagination : true,
+                    pageNumber : 1,
+                    pageSize : 50,
+                    pageList : [ 10, 20, 30, 40, 50 ],
+                    remoteSort : false,
+                    toolbar: [{
+                        id: 'button_function_update',
+                        text: '保存修改',
+                        iconCls: 'icon-save',
+                        handler: function () {
+                            acceptFunction();
+                        }
+                    }],
+                    columns: [ [{
+                        field: 'fid',
+                        sortable: true,
+                        align: 'center',
+                        checkbox: true
+                    }, {
+                        field: 'fname',
+                        title: '资源名',
+                        width: 200,
+                        align: 'center',
+                        editor: 'text'
+                    }, {
+                        field: 'url',
+                        title: 'URL地址',
+                        width: 180,
+                        align: 'center',
+                        editor: 'text'
+                    }, {
+                        field: 'status',
+                        title: '是否可用',
+                        width: 180,
+                        align: 'center',
+                        editor: {type: 'checkbox', options: {on: '是', off: '否'}}
+                    }] ],
                     onClickCell: onClickCell
+
                 });
-            }else{
-                $.messager.alert('温馨提示','你点击的节点没有子节点!','info');
+                authButShow("button_function_update");
+            } else {
+                $.messager.alert('温馨提示', '你点击的节点没有子节点!', 'info');
             }
-
-
         }
 
     });

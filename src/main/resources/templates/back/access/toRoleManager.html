@@ -1,39 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
+<head th:insert="/common/top_header :: head">
     <title>角色管理</title>
-    <link rel="shortcut icon" th:href="@{/image/yc.ico}">
-    <link rel="stylesheet" type="text/css" th:href="@{/easyui/themes/default/easyui.css}">
-    <link rel="stylesheet" type="text/css" th:href="@{/easyui/themes/icon.css}">
-    <script type="text/javascript" th:src="@{/easyui/jquery.min.js}"></script>
-    <script type="text/javascript" th:src="@{/easyui/jquery.easyui.min.js}"></script>
 </head>
 <body>
-<table id="roleData" data-options="fit:true"  pagination="true" idField="fid"
-       rownumbers="true" fitColumns="true" singleSelect="true" loadMsg="加载中..."  toolbar="#roleGrid_bar">
-    <thead>
-        <tr>
-            <th field="rid" width="50" data-options="field:'ck',checkbox:true">角色id</th>
-            <th field="rname" width="50" editor="{type:'validatebox',option:{required:true}}">角色名</th>
-            <th field="addtime" width="50" editor="text">注册时间</th>
-            <th field="fname" width="50" editor="text">资源权限</th>
-        </tr>
-
-    </thead>
-
-
-</table>
-
-<div id="roleGrid_bar" style="padding:5px;height:auto">
-    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="addRole()">添加</a>
-    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="updateRole()">修改</a>
-    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="delRole()">删除</a>
-</div>
+<table id="roleData" data-options="fit:true" ></table>
 <div id="role_panl">
     <div style="padding:10px 60px 10px 60px">
         <label>角色名:</label>
-        <input id="rname"  class="easyui-textbox" type="text" name="rname" data-options="required:true" style="width: 150px"/>
+        <input id="rname" class="easyui-textbox" type="text" name="rname" data-options="required:true"
+               style="width: 150px"/>
 
     </div>
     <ul id="functionTree"></ul>
@@ -44,160 +20,230 @@
 
 <script type="text/javascript">
 
-    var editIngStatus=undefined;/* 正在进行的操作 */
+    var editIngStatus = undefined;
+    /* 正在进行的操作 */
     $('#role_panl').dialog({
-        title:"添加",
-        width:450,
-        height:400,
-        modal:true,
-        closed:true,
-        top:100,
-        left:700
+        title: "添加",
+        width: 450,
+        height: 400,
+        modal: true,
+        closed: true,
+        top: 100,
+        left: 700
 
     });
 
-    var roleData=undefined;
-    roleData=$('#roleData').datagrid({
-        singleSelect:true,
-        url:'/back/role/findRolesByPages.action'
+    var roleData = undefined;
+    roleData = $('#roleData').datagrid({
+        singleSelect: true,
+        url: '/back/role/findRolesByPages.action',
+        striped: true,
+        loadMsg: "正在加载中...",
+        pagination: true,
+        pageNumber: 1,
+        pageSize: 50,
+        pageList: [10, 20, 30, 40, 50],
+        remoteSort: false,
+        toolbar:[ {
+            id:'button_role_add',
+            text : '添加',
+            iconCls : 'icon-add',
+            handler : function() {
+                addRole();
+            }
+        }, {
+            id:'button_role_update',
+            text : '修改',
+            iconCls : 'icon-edit',
+            handler : function() {
+                updateRole();
+            }
+        }, {
+            id:'button_role_delete',
+            text : '删除',
+            iconCls : 'icon-remove',
+            handler : function() {
+                delRole();
+            }
+        }],
+        columns: [ [
+            {
+                field: 'rid',
+                sortable: true,
+                align: 'center',
+                checkbox: true
+            }, {
+                field: 'rname',
+                title: '角色名',
+                width: 200,
+                align: 'center'
+            }, {
+                field: 'addtime',
+                title: '注册时间',
+                width: 180,
+                align: 'center'
+            }, {
+                field: 'fname',
+                title: '资源权限',
+                width: 800,
+                align: 'center'
+            }
+            /* ,
+            {field:'updatetime',title:'上次修改时间',width:180,align:'center'} */] ]
     });
-
-    function addRole(){
-        editIngStatus="add";
+    authButShow("button_role_add");
+    authButShow("button_role_update");
+    authButShow("button_role_delete");
+    function addRole() {
+        editIngStatus = "add";
         $('#role_panl').dialog({
-            title:'添加'
+            title: '添加'
         });
         $('#role_panl').dialog('open');
         $('#rname').textbox({
-            value:"",
-            editable:true
+            value: "",
+            editable: true
         });
         $('#functionTree').tree({
-            cascadeCheck:true,
-            checkbox:true,
-            url:'/back/function/functionTree.action'
+            cascadeCheck: true,
+            checkbox: true,
+            url: '/back/function/functionTree.action'
         });
-        $('#addRoleButton').linkbutton({plain:true,iconCls:'icon-add'});
+        $('#addRoleButton').linkbutton({plain: true, iconCls: 'icon-add'});
     }
 
-    function submitRoleForm(){
-        if(	editIngStatus=="update"){
-            var row=$('#roleData').datagrid('getSelected');
-            var nodes = $('#functionTree').tree('getChecked','indeterminate');
+    function submitRoleForm() {
+        if (editIngStatus == "update") {
+            var row = $('#roleData').datagrid('getSelected');
+            var nodes = $('#functionTree').tree('getChecked', 'indeterminate');
             var nodes1 = $('#functionTree').tree('getChecked');
             var s = '';
-            for(var i=0; i<nodes.length; i++){
-                if (s != ''){ s += ','};
+            for (var i = 0; i < nodes.length; i++) {
+                if (s != '') {
+                    s += ','
+                }
+                ;
                 s += nodes[i].id;
             }
-            for(var i=0; i<nodes1.length; i++){
-                if (s != ''){ s += ','};
+            for (var i = 0; i < nodes1.length; i++) {
+                if (s != '') {
+                    s += ','
+                }
+                ;
                 s += nodes1[i].id;
             }
 
-            $.messager.confirm('温馨提示','确定更改角色权限吗?',function(r){
-                if (r){
-                    $.post("/back/roleFunction/updateRoleGrant.action",{rid:row.rid,fids:s},function(data){
-                        if(data){
+            $.messager.confirm('温馨提示', '确定更改角色权限吗?', function (r) {
+                if (r) {
+                    $.post("/back/roleFunction/updateRoleGrant.action", {rid: row.rid, fids: s}, function (data) {
+                        if (data) {
                             $('#role_panl').dialog('close');
                             $.messager.show({
-                                title:'成功提示',
-                                msg:'角色修改成功！',
-                                timeout:5000,
-                                showType:'slide'
+                                title: '成功提示',
+                                msg: '角色修改成功！',
+                                timeout: 5000,
+                                showType: 'slide'
                             });
-                            editIngStatus=undefined;
-                        }else{
-                            $.messager.alert('错误','更新失败，权限不足!','error');
+                            editIngStatus = undefined;
+                        } else {
+                            $.messager.alert('错误', '更新失败，权限不足!', 'error');
                         }
 
-                    },"json");
+                    }, "json");
                 }
             });
 
-        }else if(editIngStatus=="add"){
-            var rname= $('#rname').val();
-            var nodes = $('#functionTree').tree('getChecked','indeterminate');
+        } else if (editIngStatus == "add") {
+            var rname = $('#rname').val();
+            var nodes = $('#functionTree').tree('getChecked', 'indeterminate');
             var nodes1 = $('#functionTree').tree('getChecked');
             var s = '';
-            for(var i=0; i<nodes.length; i++){
-                if (s != ''){ s += ','};
+            for (var i = 0; i < nodes.length; i++) {
+                if (s != '') {
+                    s += ','
+                }
+                ;
                 s += nodes[i].id;
             }
-            for(var i=0; i<nodes1.length; i++){
-                if (s != ''){ s += ','};
+            for (var i = 0; i < nodes1.length; i++) {
+                if (s != '') {
+                    s += ','
+                }
+                ;
                 s += nodes1[i].id;
             }
 
-            if(rname.length<2||rname.length>8){
-                $.messager.alert('提示','请输入角色名长度为2到8!','info');
-            }else if(s==""){
-                $.messager.alert('提示','请选择角色相应的权限！','info');
-            }else{
-                $.post("/back/role/addRole.action",{fids:s,rname:rname},function(data){
-                    if(data){
+            if (rname.length < 2 || rname.length > 8) {
+                $.messager.alert('提示', '请输入角色名长度为2到8!', 'info');
+            } else if (s == "") {
+                $.messager.alert('提示', '请选择角色相应的权限！', 'info');
+            } else {
+                $.post("/back/role/addRole.action", {fids: s, rname: rname}, function (data) {
+                    if (data) {
                         $('#role_panl').dialog('close');
                         $.messager.show({
-                            title:'成功提示',
-                            msg:'角色添加成功！',
-                            timeout:5000,
-                            showType:'slide'
+                            title: '成功提示',
+                            msg: '角色添加成功！',
+                            timeout: 5000,
+                            showType: 'slide'
                         });
                         $('#roleData').datagrid('reload');
-                        editIngStatus=undefined;
-                    }else{
-                        $.messager.alert('错误','添加失败，请联系开发人员!','error');
+                        editIngStatus = undefined;
+                    } else {
+                        $.messager.alert('错误', '添加失败，请联系开发人员!', 'error');
                     }
-                },"json")
+                }, "json")
             }
         }
     }
+
     //修改角色权限
-    function updateRole(){
-        editIngStatus="update";
-        var row=$('#roleData').datagrid('getSelected');
-        if(row==undefined||row==""||row==null){
-            $.messager.alert('提示','请选择要修改的行!','info');
-        }else{
+    function updateRole() {
+        editIngStatus = "update";
+        var row = $('#roleData').datagrid('getSelected');
+        if (row == undefined || row == "" || row == null) {
+            $.messager.alert('提示', '请选择要修改的行!', 'info');
+        } else {
             $('#role_panl').dialog({
-                title:'修改'
+                title: '修改'
             });
             $('#role_panl').dialog('open');
 
             $('#rname').textbox({
-                value:row.rname,
-                editable:false
+                value: row.rname,
+                editable: false
             });
             $('#functionTree').tree({
-                cascadeCheck:true,
-                checkbox:true,
-                method:'GET',
-                url:'/back/function/updateFunctionTree.action?rid='+row.rid
+                cascadeCheck: true,
+                checkbox: true,
+                method: 'GET',
+                url: '/back/function/updateFunctionTree.action?rid=' + row.rid
             });
-            $('#addRoleButton').linkbutton({plain:true,iconCls:'icon-edit'});
+            $('#addRoleButton').linkbutton({plain: true, iconCls: 'icon-edit'});
         }
     }
+
     //删除角色
-    function delRole(){
-        var row=$('#roleData').datagrid('getSelected');
-        if(row==undefined||row==""||row==null){
-            $.messager.alert('提示','请选择要删除的行!','info');
-        }else{
-            $.messager.confirm('确定', '你确定要删除角色<b>'+row.rname+'</b>吗?', function(r){
-                if (r){
-                    $.get("/back/role/delRole.action",{rid:row.rid},function(data){
-                        if(data>0){
+    function delRole() {
+        var row = $('#roleData').datagrid('getSelected');
+        if (row == undefined || row == "" || row == null) {
+            $.messager.alert('提示', '请选择要删除的行!', 'info');
+        } else {
+            $.messager.confirm('确定', '你确定要删除角色<b>' + row.rname + '</b>吗?', function (r) {
+                if (r) {
+                    $.get("/back/role/delRole.action", {rid: row.rid}, function (data) {
+                        if (data > 0) {
                             $.messager.show({
-                                title:'成功提示',
-                                msg:'角色删除成功！',
-                                timeout:5000,
-                                showType:'slide'
+                                title: '成功提示',
+                                msg: '角色删除成功！',
+                                timeout: 5000,
+                                showType: 'slide'
                             });
                             $('#roleData').datagrid('reload');
-                        }else{
-                            $.messager.alert('提示','权限不足!','info');
+                        } else {
+                            $.messager.alert('提示', '权限不足!', 'info');
                         }
-                    },"json");
+                    }, "json");
                 }
             });
         }
